@@ -35,8 +35,9 @@ export default function Register() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <h1>Support Desk</h1>
-          <p>Create your account</p>
+          <div className="logo-icon">S</div>
+          <h1>Create account</h1>
+          <p>Join Support Desk today</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -72,19 +73,22 @@ export default function Register() {
               required
             />
           </div>
+
+          {/* Role selector */}
           <div className="form-group">
             <label className="form-label">Account type</label>
-            <div style={{ display: 'flex', gap: 12 }}>
-              {['client', 'agent'].map((r) => (
-                <label key={r} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 14 }}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value={r}
-                    checked={form.role === r}
-                    onChange={() => setForm({ ...form, role: r })}
-                  />
-                  <span style={{ textTransform: 'capitalize' }}>{r}</span>
+            <div className="role-cards">
+              {[
+                { value: 'client', icon: '👤', name: 'Client', desc: 'Submit & track tickets' },
+                { value: 'agent',  icon: '🎧', name: 'Agent',  desc: 'Resolve tickets' },
+              ].map((r) => (
+                <label key={r.value} className={`role-card ${form.role === r.value ? 'selected' : ''}`}>
+                  <input type="radio" name="role" value={r.value} checked={form.role === r.value} onChange={() => setForm({ ...form, role: r.value })} />
+                  <div className="role-icon">{r.icon}</div>
+                  <div>
+                    <div className="role-name">{r.name}</div>
+                    <div className="role-desc">{r.desc}</div>
+                  </div>
                 </label>
               ))}
             </div>
@@ -99,18 +103,18 @@ export default function Register() {
                 onChange={(e) => setForm({ ...form, department: e.target.value })}
               >
                 {DEPARTMENTS.map((d) => (
-                  <option key={d} value={d} style={{ textTransform: 'capitalize' }}>{d}</option>
+                  <option key={d} value={d} style={{ textTransform: 'capitalize' }}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
                 ))}
               </select>
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-            {loading ? 'Creating account…' : 'Create account'}
+          <button type="submit" className="btn btn-primary w-full" style={{ justifyContent: 'center', marginTop: 4 }} disabled={loading}>
+            {loading ? 'Creating account…' : 'Create account →'}
           </button>
         </form>
 
-        <div className="auth-footer" style={{ marginTop: 20 }}>
+        <div className="auth-footer">
           Already have an account? <Link to="/login">Sign in</Link>
         </div>
       </div>

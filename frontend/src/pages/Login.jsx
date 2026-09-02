@@ -29,8 +29,9 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <h1>Support Desk</h1>
-          <p>Customer support ticketing platform</p>
+          <div className="logo-icon">S</div>
+          <h1>Welcome back</h1>
+          <p>Sign in to your Support Desk account</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -56,18 +57,17 @@ export default function Login() {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-            {loading ? 'Signing in…' : 'Sign in'}
+          <button type="submit" className="btn btn-primary w-full" style={{ justifyContent: 'center', marginTop: 4 }} disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign in →'}
           </button>
         </form>
 
-        <div className="auth-footer" style={{ marginTop: 20 }}>
+        <div className="auth-footer">
           Don't have an account? <Link to="/register">Create one</Link>
         </div>
 
-        {/* Demo credentials hint */}
-        <div style={{ marginTop: 20, padding: '12px 16px', background: '#f1f5f9', borderRadius: 8, fontSize: 12, color: '#64748b' }}>
-          <strong>Demo:</strong> Register as a <em>client</em> to submit tickets, or as an <em>agent</em> to manage them.
+        <div className="demo-hint">
+          <strong style={{ color: 'var(--text)' }}>Demo:</strong> Register as a <em>client</em> to submit tickets, or as an <em>agent</em> to manage them.
         </div>
       </div>
     </div>

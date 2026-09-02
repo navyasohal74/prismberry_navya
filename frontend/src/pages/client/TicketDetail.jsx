@@ -17,7 +17,7 @@ export default function ClientTicketDetail() {
     try {
       const { data } = await api.get(`/tickets/${id}`);
       setTicket(data.ticket);
-    } catch (err) {
+    } catch {
       toast.error('Ticket not found');
       navigate('/client/tickets');
     } finally {
@@ -36,7 +36,7 @@ export default function ClientTicketDetail() {
       setReply('');
       toast.success('Reply sent');
       fetchTicket();
-    } catch (err) {
+    } catch {
       toast.error('Failed to send reply');
     } finally {
       setSending(false);
@@ -50,34 +50,33 @@ export default function ClientTicketDetail() {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/client/tickets')}>← Back to tickets</button>
+      <div style={{ marginBottom: 24 }}>
+        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/client/tickets')}>← Back to tickets</button>
       </div>
 
       <div className="ticket-detail">
         {/* Main */}
-        <div>
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div className="card-header">
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>{ticket.ticketNumber}</span>
-                  <UrgencyBadge urgency={ticket.urgency} />
-                  <StatusBadge status={ticket.status} />
-                  {ticket.slaBreached && <span className="badge badge-sla">SLA Breached</span>}
-                  {ticket.escalated && <span className="badge badge-critical">Escalated</span>}
-                </div>
-                <h2 style={{ fontSize: 18, fontWeight: 700 }}>{ticket.subject}</h2>
-              </div>
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Header card */}
+          <div className="card">
             <div className="card-body">
-              <div style={{ background: 'var(--bg)', borderRadius: 8, padding: '16px 20px', marginBottom: 20, whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 700, fontFamily: 'monospace', background: 'var(--primary-soft)', padding: '3px 10px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(124,106,247,.2)' }}>
+                  {ticket.ticketNumber}
+                </span>
+                <UrgencyBadge urgency={ticket.urgency} />
+                <StatusBadge status={ticket.status} />
+                {ticket.slaBreached && <span className="badge badge-sla">SLA Breached</span>}
+                {ticket.escalated && <span className="badge badge-critical">Escalated</span>}
+              </div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.4, marginBottom: 16 }}>{ticket.subject}</h2>
+              <div style={{ background: 'var(--bg-2)', borderRadius: 'var(--radius)', padding: '18px 20px', whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
                 {ticket.description}
               </div>
 
               {ticket.attachments?.length > 0 && (
-                <div style={{ marginBottom: 20 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Attachments</p>
+                <div style={{ marginBottom: 14 }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.5px' }}>Attachments</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {ticket.attachments.map((a, i) => (
                       <a key={i} href={`http://localhost:5000${a.path}`} target="_blank" rel="noreferrer" className="badge badge-tag" style={{ textDecoration: 'none' }}>
@@ -87,14 +86,18 @@ export default function ClientTicketDetail() {
                   </div>
                 </div>
               )}
-
               <TagList tags={ticket.tags} />
             </div>
           </div>
 
-          {/* Thread */}
+          {/* Conversation */}
           <div className="card">
-            <div className="card-header"><h2>Conversation ({publicComments.length})</h2></div>
+            <div className="card-header">
+              <h2>Conversation</h2>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', background: 'var(--bg-2)', padding: '3px 10px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border)' }}>
+                {publicComments.length} {publicComments.length === 1 ? 'reply' : 'replies'}
+              </span>
+            </div>
             <div className="card-body">
               {publicComments.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No replies yet. An agent will respond shortly.</p>
@@ -105,7 +108,7 @@ export default function ClientTicketDetail() {
                       <div className="comment-header">
                         <span className="comment-author">
                           {c.authorRole === 'agent' ? '🎧 ' : '👤 '}{c.authorName}
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400, marginLeft: 6, textTransform: 'capitalize' }}>({c.authorRole})</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-light)', fontWeight: 400, marginLeft: 6, textTransform: 'capitalize' }}>({c.authorRole})</span>
                         </span>
                         <span className="comment-time">{formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}</span>
                       </div>
@@ -116,8 +119,8 @@ export default function ClientTicketDetail() {
               )}
 
               {!['resolved', 'closed'].includes(ticket.status) && (
-                <form onSubmit={handleReply} style={{ marginTop: 24 }}>
-                  <div className="form-group" style={{ marginBottom: 10 }}>
+                <form onSubmit={handleReply} style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+                  <div className="form-group" style={{ marginBottom: 12 }}>
                     <label className="form-label">Add a reply</label>
                     <textarea
                       className="form-control"
@@ -128,7 +131,7 @@ export default function ClientTicketDetail() {
                     />
                   </div>
                   <button type="submit" className="btn btn-primary btn-sm" disabled={sending || !reply.trim()}>
-                    {sending ? 'Sending…' : 'Send Reply'}
+                    {sending ? 'Sending…' : 'Send Reply →'}
                   </button>
                 </form>
               )}
@@ -141,50 +144,47 @@ export default function ClientTicketDetail() {
           <div className="card">
             <div className="card-header"><h2>Details</h2></div>
             <div className="card-body">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: 14 }}>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>Status</div>
-                  <StatusBadge status={ticket.status} />
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>Urgency</div>
-                  <UrgencyBadge urgency={ticket.urgency} />
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>Department</div>
-                  <strong style={{ textTransform: 'capitalize' }}>{ticket.department}</strong>
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>Assigned agent</div>
-                  <strong>{ticket.agentName || 'Unassigned'}</strong>
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>SLA</div>
-                  <SLAIndicator ticket={ticket} />
-                  {ticket.slaDeadline && (
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                      Due: {format(new Date(ticket.slaDeadline), 'MMM d, yyyy HH:mm')}
-                    </div>
-                  )}
-                </div>
-                <hr className="divider" style={{ margin: '4px 0' }} />
-                <div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>Submitted</div>
-                  <strong>{format(new Date(ticket.createdAt), 'MMM d, yyyy HH:mm')}</strong>
-                </div>
-                {ticket.firstResponseAt && (
-                  <div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>First response</div>
-                    <strong>{ticket.responseTimeMinutes} min</strong>
-                  </div>
-                )}
-                {ticket.resolvedAt && (
-                  <div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 2 }}>Resolved</div>
-                    <strong>{format(new Date(ticket.resolvedAt), 'MMM d, yyyy HH:mm')}</strong>
-                  </div>
+              <div className="info-row">
+                <span className="info-label">Status</span>
+                <span className="info-value"><StatusBadge status={ticket.status} /></span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Urgency</span>
+                <span className="info-value"><UrgencyBadge urgency={ticket.urgency} /></span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Department</span>
+                <span className="info-value" style={{ textTransform: 'capitalize' }}>{ticket.department}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Assigned Agent</span>
+                <span className="info-value">{ticket.agentName || <span style={{ color: 'var(--text-muted)' }}>Unassigned</span>}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">SLA</span>
+                <span className="info-value"><SLAIndicator ticket={ticket} /></span>
+                {ticket.slaDeadline && (
+                  <span style={{ fontSize: 12, color: 'var(--text-light)' }}>
+                    Due {format(new Date(ticket.slaDeadline), 'MMM d, HH:mm')}
+                  </span>
                 )}
               </div>
+              <div className="info-row">
+                <span className="info-label">Submitted</span>
+                <span className="info-value">{format(new Date(ticket.createdAt), 'MMM d, yyyy HH:mm')}</span>
+              </div>
+              {ticket.firstResponseAt && (
+                <div className="info-row">
+                  <span className="info-label">First Response</span>
+                  <span className="info-value">{ticket.responseTimeMinutes} min</span>
+                </div>
+              )}
+              {ticket.resolvedAt && (
+                <div className="info-row">
+                  <span className="info-label">Resolved</span>
+                  <span className="info-value">{format(new Date(ticket.resolvedAt), 'MMM d, HH:mm')}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

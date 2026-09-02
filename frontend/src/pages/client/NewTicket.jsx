@@ -22,13 +22,11 @@ export default function NewTicket() {
       fd.append('subject', form.subject);
       fd.append('description', form.description);
       files.forEach((f) => fd.append('attachments', f));
-
       const { data } = await api.post('/tickets', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
       setAck(data);
-      toast.success('Ticket submitted successfully!');
+      toast.success('Ticket submitted!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to submit ticket');
     } finally {
@@ -38,22 +36,43 @@ export default function NewTicket() {
 
   if (ack) {
     return (
-      <div style={{ maxWidth: 600, margin: '0 auto' }}>
-        <div className="card" style={{ textAlign: 'center', padding: '48px 32px' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-          <h2 style={{ marginBottom: 12, fontSize: 20 }}>Ticket Submitted!</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.8 }}>{ack.message}</p>
-          <div style={{ background: 'var(--bg)', borderRadius: 8, padding: '16px 20px', textAlign: 'left', marginBottom: 24 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 14 }}>
-              <div><span style={{ color: 'var(--text-muted)' }}>Ticket #</span><br /><strong>{ack.ticket.ticketNumber}</strong></div>
-              <div><span style={{ color: 'var(--text-muted)' }}>Urgency</span><br /><span className={`badge badge-${ack.ticket.urgency}`}>{ack.ticket.urgency}</span></div>
-              <div><span style={{ color: 'var(--text-muted)' }}>Department</span><br /><strong style={{ textTransform: 'capitalize' }}>{ack.ticket.department}</strong></div>
-              <div><span style={{ color: 'var(--text-muted)' }}>Assigned to</span><br /><strong>{ack.ticket.agentName || 'Pending assignment'}</strong></div>
+      <div style={{ maxWidth: 580, margin: '0 auto' }}>
+        <div className="card" style={{ padding: '48px 40px', textAlign: 'center' }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%',
+            background: 'rgba(0,200,150,.12)', border: '2px solid rgba(0,200,150,.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px', fontSize: 28
+          }}>✓</div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8, letterSpacing: -0.5 }}>Ticket Submitted!</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: 28, fontSize: 14 }}>{ack.message}</p>
+
+          <div className="ack-grid">
+            <div className="ack-item">
+              <div className="ack-label">Ticket #</div>
+              <div className="ack-value" style={{ color: 'var(--primary)' }}>{ack.ticket.ticketNumber}</div>
+            </div>
+            <div className="ack-item">
+              <div className="ack-label">Urgency</div>
+              <div className="ack-value"><span className={`badge badge-${ack.ticket.urgency}`}>{ack.ticket.urgency}</span></div>
+            </div>
+            <div className="ack-item">
+              <div className="ack-label">Department</div>
+              <div className="ack-value" style={{ textTransform: 'capitalize' }}>{ack.ticket.department}</div>
+            </div>
+            <div className="ack-item">
+              <div className="ack-label">Assigned to</div>
+              <div className="ack-value">{ack.ticket.agentName || 'Pending assignment'}</div>
             </div>
           </div>
+
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button className="btn btn-secondary" onClick={() => { setAck(null); setForm({ subject: '', description: '' }); setFiles([]); }}>Submit another</button>
-            <button className="btn btn-primary" onClick={() => navigate(`/client/tickets/${ack.ticket._id}`)}>View ticket</button>
+            <button className="btn btn-ghost" onClick={() => { setAck(null); setForm({ subject: '', description: '' }); setFiles([]); }}>
+              Submit another
+            </button>
+            <button className="btn btn-primary" onClick={() => navigate(`/client/tickets/${ack.ticket._id}`)}>
+              View ticket →
+            </button>
           </div>
         </div>
       </div>
@@ -61,19 +80,23 @@ export default function NewTicket() {
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto' }}>
+    <div style={{ maxWidth: 680, margin: '0 auto' }}>
       <div className="page-header">
         <div>
           <h1>New Support Ticket</h1>
-          <p>Describe your issue and we'll route it to the right team</p>
+          <p>Describe your issue — we'll route it to the right team automatically</p>
         </div>
       </div>
 
       <div className="card">
         <div className="card-body">
+          <div className="tip-box">
+            💡 The more detail you include, the faster we can resolve your issue. We'll auto-detect urgency and assign the right team.
+          </div>
+
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Subject *</label>
+              <label className="form-label">Subject <span style={{ color: 'var(--danger)' }}>*</span></label>
               <input
                 className="form-control"
                 placeholder="Brief summary of your issue"
@@ -82,14 +105,14 @@ export default function NewTicket() {
                 required
                 maxLength={200}
               />
-              <span className="form-error" style={{ color: 'var(--text-muted)', fontSize: 11 }}>{form.subject.length}/200</span>
+              <span className="form-hint">{form.subject.length}/200 characters</span>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Description *</label>
+              <label className="form-label">Description <span style={{ color: 'var(--danger)' }}>*</span></label>
               <textarea
                 className="form-control"
-                placeholder="Please provide as much detail as possible: what happened, what you expected, any error messages, steps to reproduce…"
+                placeholder="Describe what happened, what you expected, any error messages, and steps to reproduce…"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 required
@@ -98,32 +121,31 @@ export default function NewTicket() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Attachments <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional, max 5 files, 10 MB each)</span></label>
+              <label className="form-label">
+                Attachments
+                <span className="form-hint" style={{ marginLeft: 8, textTransform: 'none' }}>optional · max 5 files · 10 MB each</span>
+              </label>
               <input
                 type="file"
                 multiple
                 accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.doc,.docx,.xls,.xlsx,.zip"
                 onChange={(e) => setFiles(Array.from(e.target.files))}
                 className="form-control"
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', paddingTop: 8 }}
               />
               {files.length > 0 && (
-                <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {files.map((f, i) => (
-                    <span key={i} className="badge badge-tag">{f.name}</span>
+                    <span key={i} className="badge badge-tag">📎 {f.name}</span>
                   ))}
                 </div>
               )}
             </div>
 
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#166534' }}>
-              💡 <strong>Tip:</strong> Include error messages, screenshots, and steps to reproduce for faster resolution. Your ticket will be automatically classified and assigned.
-            </div>
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button type="button" className="btn btn-secondary" onClick={() => navigate('/client/dashboard')}>Cancel</button>
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <button type="button" className="btn btn-ghost" onClick={() => navigate('/client/dashboard')}>Cancel</button>
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Submitting…' : 'Submit Ticket'}
+                {loading ? 'Submitting…' : 'Submit Ticket →'}
               </button>
             </div>
           </form>
